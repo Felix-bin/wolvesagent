@@ -1,24 +1,36 @@
-from typing import Any
+# -*- coding: utf-8 -*-
+"""DashScope客户端实现"""
 
+from typing import Any
 from agentscope.model import DashScopeChatModel, ChatResponse
 from agentscope.message import Msg
 from services.llm.base import BaseLLMClient
-from configs.config import ModelConfig
 
 
 class DashScopeClient(BaseLLMClient):
     """使用 agentscope 实现的 DashScope 客户端"""
 
-    def __init__(self, model_config: ModelConfig):
+    def __init__(self, model_config):
         super().__init__(model_config)
         
         # 使用配置中的所有参数初始化 DashScope 模型
+        generate_kwargs = getattr(model_config, 'generate_kwargs', {})
+        if not generate_kwargs:
+            # 从配置构建generate_kwargs
+            generate_kwargs = {}
+            if hasattr(model_config, 'temperature'):
+                generate_kwargs['temperature'] = model_config.temperature
+            if hasattr(model_config, 'max_tokens') and model_config.max_tokens:
+                generate_kwargs['max_tokens'] = model_config.max_tokens
+            if hasattr(model_config, 'top_p') and model_config.top_p:
+                generate_kwargs['top_p'] = model_config.top_p
+        
         self.model: DashScopeChatModel = DashScopeChatModel(
             api_key=self.api_key,
             model_name=model_config.model_name,
-            stream=model_config.stream,
-            enable_thinking=model_config.enable_thinking,
-            generate_kwargs=model_config.generate_kwargs,
+            stream=getattr(model_config, 'stream', True),
+            enable_thinking=getattr(model_config, 'enable_thinking', None),
+            generate_kwargs=generate_kwargs,
             base_http_api_url=self.base_url,
         )
         
@@ -45,7 +57,7 @@ class DashScopeClient(BaseLLMClient):
     async def chat(
         self,
         messages: list[Msg],
-        model_config: ModelConfig,
+        model_config,
         tools: list[dict[str, Any]] | None = None,
         reuse_history: bool = True,
     ) -> ChatResponse:
@@ -54,11 +66,11 @@ class DashScopeClient(BaseLLMClient):
         Args:
             messages: 要发送的 Msg 对象列表
             model_config: 模型配置
-            tools: 可选的工具 JSON schemas 列表，用于函数调用（从 Toolkit.get_json_schemas() 获取）
+            tools: 可选的工具 JSON schemas 列表
             reuse_history: 是否重用现有聊天历史
             
         Returns:
-            来自模型的 ChatResponse（如果是流式响应，返回最后一个累积的响应）
+            来自模型的 ChatResponse
         """
         # 准备 API 调用的消息
         api_messages = []
@@ -77,18 +89,30 @@ class DashScopeClient(BaseLLMClient):
                 message_dict["name"] = msg.name
             api_messages.append(message_dict)
         
-        # 工具 schemas 已经是正确的格式（从 Toolkit.get_json_schemas() 获取）
+        # 工具 schemas 已经是正确的格式
         tool_schemas = tools
+        
+        # 获取generate_kwargs
+        generate_kwargs = getattr(model_config, 'generate_kwargs', {})
+        if not generate_kwargs:
+            generate_kwargs = {}
+            if hasattr(model_config, 'temperature'):
+                generate_kwargs['temperature'] = model_config.temperature
+            if hasattr(model_config, 'max_tokens') and model_config.max_tokens:
+                generate_kwargs['max_tokens'] = model_config.max_tokens
+            if hasattr(model_config, 'top_p') and model_config.top_p:
+                generate_kwargs['top_p'] = model_config.top_p
         
         # 调用模型
         response = await self.model(
             messages=api_messages,
             tools=tool_schemas,
-            **model_config.generate_kwargs
+            **generate_kwargs
         )
         
         # 处理流式响应
-        if model_config.stream:
+        stream = getattr(model_config, 'stream', True)
+        if stream:
             # 对于流式响应，收集所有块并返回最后一个（累积的）
             final_response = None
             async for chunk in response:
@@ -109,7 +133,7 @@ class DashScopeClient(BaseLLMClient):
     async def chat_stream(
         self,
         messages: list[Msg],
-        model_config: ModelConfig,
+        model_config,
         tools: list[dict[str, Any]] | None = None,
         reuse_history: bool = True,
     ):
@@ -143,11 +167,14 @@ class DashScopeClient(BaseLLMClient):
         
         tool_schemas = tools
         
+        # 获取generate_kwargs
+        generate_kwargs = getattr(model_config, 'generate_kwargs', {})
+        
         # 调用模型
         response = await self.model(
             messages=api_messages,
             tools=tool_schemas,
-            **model_config.generate_kwargs
+            **generate_kwargs
         )
         
         # 流式返回
@@ -193,3 +220,4 @@ class DashScopeClient(BaseLLMClient):
             if block.get("type") == "text":
                 text_parts.append(block.get("text", ""))
         return " ".join(text_parts)
+

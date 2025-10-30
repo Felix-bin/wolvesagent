@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+"""LLM客户端基类"""
+
 from abc import ABC, abstractmethod
 from typing import Any
-from configs.config import ModelConfig
 from agentscope.message import Msg
 from agentscope.model import ChatResponse
 
@@ -12,16 +14,16 @@ class BaseLLMClient(ABC):
     它处理模型配置的初始化，并定义所有客户端必须实现的核心方法。
     """
 
-    def __init__(self, model_config: ModelConfig):
+    def __init__(self, model_config):
         """使用模型配置初始化 LLM 客户端
         
         Args:
-            model_config: 包含模型和提供商设置的配置
+            model_config: 包含模型和提供商设置的配置对象
         """
-        self.api_key: str = model_config.model_provider.api_key
-        self.base_url: str | None = model_config.model_provider.base_url
-        self.api_version: str | None = model_config.model_provider.api_version
-        self.model_config: ModelConfig = model_config
+        self.api_key: str = model_config.api_key
+        self.base_url: str | None = getattr(model_config, 'base_url', None)
+        self.api_version: str | None = getattr(model_config, 'api_version', None)
+        self.model_config = model_config
 
     @abstractmethod
     def set_chat_history(self, messages: list[ChatResponse]) -> None:
@@ -36,7 +38,7 @@ class BaseLLMClient(ABC):
     async def chat(
         self,
         messages: list[Msg],
-        model_config: ModelConfig,
+        model_config,
         tools: list[dict[str, Any]] | None = None,
         reuse_history: bool = True,
     ) -> ChatResponse:
@@ -53,7 +55,7 @@ class BaseLLMClient(ABC):
         """
         pass
 
-    def supports_tool_calling(self, model_config: ModelConfig) -> bool:
+    def supports_tool_calling(self, model_config) -> bool:
         """检查当前模型是否支持工具调用
         
         Args:
@@ -62,4 +64,5 @@ class BaseLLMClient(ABC):
         Returns:
             如果模型支持工具调用返回 True，否则返回 False
         """
-        return model_config.supports_tool_calling
+        return getattr(model_config, 'supports_tool_calling', True)
+

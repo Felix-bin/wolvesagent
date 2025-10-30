@@ -3,7 +3,7 @@
 """A werewolf game implemented by agentscope."""
 import numpy as np
 
-from utils import (
+from werewolves.utils import (
     majority_vote,
     names_to_str,
     EchoAgent,
@@ -11,7 +11,7 @@ from utils import (
     MAX_DISCUSSION_ROUND,
     Players,
 )
-from structured_model import (
+from werewolves.structured_model import (
     DiscussionModel,
     get_vote_model,
     get_poison_model,
@@ -19,10 +19,10 @@ from structured_model import (
     get_seer_model,
     get_hunter_model,
 )
-from prompt import EnglishPrompts as Prompts
+from werewolves.prompt import EnglishPrompts as Prompts
 
 # Uncomment the following line to use Chinese prompts
-# from prompt import ChinesePrompts as Prompts
+from werewolves.prompt import ChinesePrompts as Prompts
 
 
 from agentscope.agent import ReActAgent
