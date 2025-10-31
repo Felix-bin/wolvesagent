@@ -1,3 +1,8 @@
+# 环境变量和配置
+.env
+.env.local
+*.env
+
 # Python
 __pycache__/
 *.py[cod]
@@ -16,20 +21,17 @@ parts/
 sdist/
 var/
 wheels/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # 虚拟环境
 venv/
 ENV/
 env/
 .venv
-
-# 环境变量文件
-.env
-.env.local
-.env.*.local
 
 # IDE
 .vscode/
@@ -39,31 +41,34 @@ env/
 *~
 .DS_Store
 
-# 测试和覆盖率
+# 测试和覆盖
 .pytest_cache/
 .coverage
 htmlcov/
-.tox/
+*.cover
 .hypothesis/
 
-# 日志
+# 日志文件
 *.log
 logs/
 
-# 检查点
+# 检查点和状态文件
 checkpoints/
 *.ckpt
-
-# Jupyter Notebook
-.ipynb_checkpoints
+*.pth
+*.pkl
 
 # 临时文件
-*.tmp
-*.bak
-*.swp
 temp/
 tmp/
+*.tmp
 
-# UV
-.uv/
+# 操作系统
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
+# 项目特定
+test_checkpoints/
+.python-version
+uv.lock

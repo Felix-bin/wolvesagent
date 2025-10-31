@@ -1,0 +1,73 @@
+# 狼人杀游戏模型配置文件
+# 仅支持DashScope可调用的模型
+
+# 默认使用的模型
+default_model: glm-4.5-air
+
+# DashScope模型配置
+models:
+  # GLM-4.5-Air模型配置 (通过DashScope)
+  glm-4.5-air:
+    model_class: DashScopeChatModel
+    config_name: glm-4.5-air
+    api_key: ${DASHSCOPE_API_KEY}  # 从环境变量读取
+    model: glm-4.5-air
+    generate_config:
+      temperature: 0.7
+      max_tokens: 2048
+  
+  # Qwen-Max模型配置 (通过DashScope)
+  qwen-max:
+    model_class: DashScopeChatModel
+    config_name: qwen-max
+    api_key: ${DASHSCOPE_API_KEY}  # 从环境变量读取
+    model: qwen-max
+    generate_config:
+      temperature: 0.7
+      max_tokens: 2048
+  
+  # Qwen3-Max模型配置 (通过DashScope)
+  qwen3-max:
+    model_class: DashScopeChatModel
+    config_name: qwen3-max
+    api_key: ${DASHSCOPE_API_KEY:}  # 请在此处填写您的DashScope API密钥
+    model: qwen3-max
+    generate_config:
+      temperature: 0.7
+      max_tokens: 2048
+  
+  # DeepSeek-V3模型配置 (通过DashScope)
+  deepseek-v3:
+    model_class: DashScopeChatModel
+    config_name: deepseek-v3
+    api_key: ${DASHSCOPE_API_KEY:}  # 请在此处填写您的DashScope API密钥
+    model: deepseek-v3
+    generate_config:
+      temperature: 0.7
+      max_tokens: 2048
+  
+  # DeepSeek-V3.2-Exp模型配置 (通过DashScope)
+  deepseek-v3.2-exp:
+    model_class: DashScopeChatModel
+    config_name: deepseek-v3.2-exp
+    api_key: ${DASHSCOPE_API_KEY:}  # 请在此处填写您的DashScope API密钥
+    model: deepseek-v3.2-exp
+    generate_config:
+      temperature: 0.7
+      max_tokens: 2048
+
+# 游戏配置
+game:
+  max_rounds: 10
+  max_discussion_rounds: 3
+  timeout_seconds: 30
+  player_count: 9
+  
+# 角色配置
+roles:
+  werewolf: 2
+  villager: 3
+  seer: 1
+  witch: 1
+  hunter: 1
+  guard: 1

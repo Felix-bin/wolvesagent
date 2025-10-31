@@ -1,20 +1,16 @@
+# -*- coding: utf-8 -*-
+"""LLM客户端主类"""
 
 from enum import Enum
 from typing import Any
-
-from configs.config import ModelConfig
 from services.llm.base import BaseLLMClient
 from agentscope.message import Msg
 from agentscope.model import ChatResponse
 
 
 class LLMProvider(Enum):
-    """支持的 LLM 提供商
+    """支持的 LLM 提供商"""
     
-    此枚举定义了系统中所有支持的 LLM 提供商。
-    实现新提供商时在这里添加。
-    """
-
     DashScope = "dashscope"
     OpenAI = "openai"
     Anthropic = "anthropic"
@@ -27,21 +23,23 @@ class LLMClient:
     它根据模型配置中指定的提供商自动选择适当的客户端。
     """
 
-    def __init__(self, model_config: ModelConfig):
+    def __init__(self, model_config):
         """使用模型配置初始化 LLM 客户端
         
         Args:
-            model_config: 包含提供商和模型设置的配置
+            model_config: 包含提供商和模型设置的配置对象
             
         Raises:
             ValueError: 当指定的提供商不受支持时抛出
         """
-        self.provider: LLMProvider = LLMProvider(model_config.model_provider.provider)
-        self.model_config: ModelConfig = model_config
+        # 获取provider
+        provider_str = getattr(model_config, 'provider', 'dashscope')
+        self.provider: LLMProvider = LLMProvider(provider_str)
+        self.model_config = model_config
 
         match self.provider:
             case LLMProvider.DashScope:
-                from .dashscope import DashScopeClient
+                from services.llm.dashscope import DashScopeClient
                 self.client: BaseLLMClient = DashScopeClient(model_config)
             case LLMProvider.OpenAI:
                 # TODO: 实现 OpenAI 客户端
@@ -63,7 +61,7 @@ class LLMClient:
     async def chat(
         self,
         messages: list[Msg],
-        model_config: ModelConfig | None = None,
+        model_config=None,
         tools: list[dict[str, Any]] | None = None,
         reuse_history: bool = True,
     ) -> ChatResponse:
@@ -72,7 +70,7 @@ class LLMClient:
         Args:
             messages: 要发送的 Msg 对象列表
             model_config: 可选的模型配置覆盖。如果为 None，使用默认配置
-            tools: 可选的工具 JSON schemas 列表，用于函数调用（从 Toolkit.get_json_schemas() 获取）
+            tools: 可选的工具 JSON schemas 列表
             reuse_history: 是否包含之前的聊天历史
             
         Returns:
@@ -82,7 +80,7 @@ class LLMClient:
         config = model_config or self.model_config
         return await self.client.chat(messages, config, tools, reuse_history)
 
-    def supports_tool_calling(self, model_config: ModelConfig | None = None) -> bool:
+    def supports_tool_calling(self, model_config=None) -> bool:
         """检查当前客户端是否支持工具调用
         
         Args:
@@ -93,3 +91,4 @@ class LLMClient:
         """
         config = model_config or self.model_config
         return hasattr(self.client, "supports_tool_calling") and self.client.supports_tool_calling(config)
+
