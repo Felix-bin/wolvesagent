@@ -3,7 +3,6 @@
 
 from .logger import WerewolfLogger, GameMetrics
 from .parser import EnvInfoParser
-from .api_adapter import APIAdapter
 from .official_compatibility import *
 
 __all__ = [
