@@ -3,8 +3,12 @@
 """The main entry point for the werewolf game."""
 import asyncio
 import os
+from dotenv import load_dotenv
 
-from game import werewolves_game
+# Load environment variables from .env file
+load_dotenv()
+
+from .game import werewolves_game
 
 from agentscope.agent import ReActAgent
 from agentscope.formatter import DashScopeMultiAgentFormatter
